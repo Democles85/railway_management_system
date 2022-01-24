@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web SQL Database with HTML and Javascript</title>
+    <meta name="viewport" content="user-scalable=no,width=device-width" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+    <script src="/js/"></script>
+
+    <script type="text/javascript" src="js/jquery.js"></script>
+  </head>
+  <body style="margin: 30px">
+    <!--
+	How to View Web SQL data:
+0. Run the source code above on your browser
+1. Press Ctrl + Shift + I
+2. Click on "Application" tab
+3. Double click on "Web SQL" then click on itemDB (name of our database)
+-->
+
+    <div class="container">
+      <h2 class="text-center">Tabela USER</h2>
+      <div class="row">
+        <form>
+          <fieldset>
+            <legend>Emri</legend>
+            <input type="text" class="form-control" id="emri" name="Emri" />
+
+            <legend>Mbiemri</legend>
+            <input type="text" class="form-control" id="mbiemri" name="" />
+
+            <legend>Gjinia</legend>
+            <input type="text" class="form-control" id="gjinia" name="" />
+
+            <legend>Mosha</legend>
+            <input type="number" class="form-control" id="mosha" name="" />
+            <br />
+
+            <div class="text-center">
+              <button type="button" id="insert" class="btn btn-success">
+                Insert
+              </button>
+              <button type="button" id="createUser" class="btn btn-success">
+                Create Table
+              </button>
+              <button type="button" id="remove" class="btn btn-danger">
+                Delete Table
+              </button>
+              <button type="button" id="listUser" class="btn btn-success">
+                Fetch Record
+              </button>
+            </div>
+
+            <p class="text-center">
+              <small
+                ><b>Note:</b> Table must be created first before inserting or
+                performing any transaction</small
+              >
+            </p>
+          </fieldset>
+        </form>
+
+        <hr />
+        <h4>Record</h4>
+        <table class="table table-bordered table-hover" id="userList"></table>
+      </div>
+
+      <h2 class="text-center">Tabela TRENI</h2>
+      <div class="row">
+        <form>
+          <fieldset>
+            <legend>Emer Treni</legend>
+            <input
+              type="text"
+              class="form-control"
+              id="emer_treni"
+              name="Emri"
+            />
+
+            <legend>Koha Mberritjes</legend>
+            <input
+              type="time"
+              class="form-control"
+              id="koha_mberritjes"
+              name="Emri"
+            />
+
+            <legend>Koha Nisjes</legend>
+            <input
+              type="time"
+              class="form-control"
+              id="koha_nisjes"
+              name="Emri"
+            />
+            <legend>Data</legend>
+            <input
+              type="date"
+              class="form-control"
+              id="data"
+              name="Data Nisjes"
+            />
+
+            <br />
+            <div class="text-center">
+              <button type="button" id="insertTreni" class="btn btn-success">
+                Insert
+              </button>
+
+              <button type="button" id="createTreni" class="btn btn-success">
+                Create Table
+              </button>
+
+              <button type="button" id="removeTreni" class="btn btn-danger">
+                Delete Table
+              </button>
+
+              <button type="button" id="listTreni" class="btn btn-success">
+                Fetch Record
+              </button>
+            </div>
+            <p class="text-center">
+              <small
+                ><b>Note:</b> Table must be created first before inserting or
+                performing any transaction</small
+              >
+            </p>
+          </fieldset>
+        </form>
+
+        <hr />
+        <h4>Record</h4>
+        <table class="table table-bordered table-hover" id="trainList"></table>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var db = openDatabase(
+        'Railway_Management_System',
+        '1.0',
+        'itemDB',
+        65535
+      );
+
+      $(function () {
+        loadData();
+        //CREATE TABLE USER
+        $('#createUser').click(function () {
+          db.transaction(function (transaction) {
+            var sql =
+              'CREATE TABLE user(' +
+              'user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,' +
+              'emri VARCHAR(20) NOT NULL,' +
+              'mbiemri VARCHAR(20) NOT NULL,' +
+              'gjinia CHAR NOT NULL,' +
+              'mosha INT(3) NOT NULL)';
+            transaction.executeSql(
+              sql,
+              undefined,
+              function () {
+                alert('Table is created successfully');
+              },
+              function () {
+                alert('Table is already being created');
+              }
+            );
+          });
+        });
+
+        //CREATE TABLE TRENI
+        $('#createTreni').click(function () {
+          db.transaction(function (transaction) {
+            var sql =
+              'CREATE TABLE treni(' +
+              'nr_treni INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,' +
+              'emer_treni VARCHAR(20) NOT NULL,' +
+              'koha_mberritjes TIME,' +
+              'koha_nisjes TIME, ' +
+              'ndenjeset_bosh INT(10),' +
+              'data DATE)';
+            transaction.executeSql(
+              sql,
+              undefined,
+              function () {
+                alert('Tabela "Treni" u krijua me sukses!');
+              },
+              function () {
+                alert('Tabela "Treni" eshte duke u krijuar!');
+              }
+            );
+          });
+        });
+
+        //DELETE TABLE USER
+        $('#remove').click(function () {
+          if (!confirm('Are you sure to delete this table?', '')) return;
+          db.transaction(function (transaction) {
+            var sql = 'DROP TABLE user';
+            transaction.executeSql(
+              sql,
+              undefined,
+              function () {
+                alert('Table is deleted successfully');
+              },
+              function (transaction, err) {
+                alert(err.message);
+              }
+            );
+          });
+        });
+
+        //DELETE TABLE TRENI
+        $('#removeTreni').click(function () {
+          if (!confirm('Are you sure to delete this table?', '')) return;
+          db.transaction(function (transaction) {
+            var sql = 'DROP TABLE treni';
+            transaction.executeSql(
+              sql,
+              undefined,
+              function () {
+                alert('Table "Treni" is deleted successfully');
+              },
+              function (transaction, err) {
+                alert(err.message);
+              }
+            );
+          });
+        });
+
+        //INSERT IN TABLE USER
+        $('#insert').click(function () {
+          var emri = $('#emri').val();
+          var mbiemri = $('#mbiemri').val();
+          var gjinia = $('#gjinia').val();
+          var mosha = $('#mosha').val();
+          db.transaction(function (transaction) {
+            var sql =
+              'INSERT INTO user(emri,mbiemri,gjinia,mosha) VALUES(?,?,?,?)';
+            transaction.executeSql(
+              sql,
+              [emri, mbiemri, gjinia, mosha],
+              function () {
+                alert('New user is added successfully');
+              },
+              function (transaction, err) {
+                alert(err.message);
+              }
+            );
+          });
+        });
+
+        //INSERT IN TABLE TRENI
+        $('#insertTreni').click(function () {
+          var emer_treni = $('#emer_treni').val();
+          var koha_mberritjes = $('#koha_mberritjes').val();
+          var koha_nisjes = $('#koha_nisjes').val();
+          var data = $('#data').val();
+          // var mosha = $('#mosha').val();
+          db.transaction(function (transaction) {
+            var sql =
+              'INSERT INTO treni(emer_treni,koha_mberritjes,koha_nisjes, data) VALUES(?,?,?,?)';
+            transaction.executeSql(
+              sql,
+              [emer_treni, koha_mberritjes, koha_nisjes, data],
+              function () {
+                alert('New train is added successfully');
+              },
+              function (transaction, err) {
+                alert(err.message);
+              }
+            );
+          });
+        });
+
+        //FETCHING USER LIST
+        $('#listUser').click(function () {
+          loadData();
+        });
+
+        //FUNCTION TO LOAD USER RECORDS
+        function loadData() {
+          $('#userList').children().remove();
+          db.transaction(function (transaction) {
+            var sql = 'SELECT * FROM user ORDER BY user_id ASC';
+            transaction.executeSql(
+              sql,
+              undefined,
+              function (transaction, result) {
+                if (result.rows.length) {
+                  $('#userList').append(
+                    '<tr>' +
+                      '<th> ID </th>' +
+                      '<th> Emri </th>' +
+                      '<th> Mbiemri </th>' +
+                      '<th> Mosha </th>' +
+                      '<th> Gjinia </th>' +
+                      '</tr>'
+                  );
+                  for (var i = 0; i < result.rows.length; i++) {
+                    var row = result.rows.item(i);
+                    var id = row.user_id;
+                    var emri = row.emri;
+                    var mbiemri = row.mbiemri;
+                    var gjinia = row.gjinia;
+                    var mosha = row.mosha;
+                    $('#userList').append(
+                      '<tr>' +
+                        '<td>' +
+                        id +
+                        '</td>' +
+                        '<td>' +
+                        emri +
+                        '</td><td>' +
+                        mbiemri +
+                        '</td><td>' +
+                        mosha +
+                        '</td><td>' +
+                        gjinia +
+                        '</td>' +
+                        '</tr>'
+                    );
+                  }
+                } else {
+                  $('#userList').append(
+                    '<tr><td colspan="3" align="center">No Item Found</td></tr>'
+                  );
+                }
+              },
+              function (transaction, err) {
+                alert(
+                  'No table found. Click on "Create Table" to create table now'
+                );
+              }
+            );
+          });
+        }
+
+        //FETCHING TRAIN LIST
+        $('#listTreni').click(function () {
+          loadTreni();
+        });
+
+        //FUNCTION TO LOAD TRAIN RECORDS
+        function loadTreni() {
+          $('#trainList').children().remove();
+          db.transaction(function (transaction) {
+            var sql = 'SELECT * FROM treni ORDER BY nr_treni ASC';
+            transaction.executeSql(
+              sql,
+              undefined,
+              function (transaction, result) {
+                if (result.rows.length) {
+                  $('#trainList').append(
+                    '<tr>' +
+                      '<th> ID </th>' +
+                      '<th> Treni </th>' +
+                      '<th> Koha Mberritjes </th>' +
+                      '<th> Koha Nisjes </th>' +
+                      '<th> Data </th>' +
+                      '</tr>'
+                  );
+                  for (var i = 0; i < result.rows.length; i++) {
+                    var row = result.rows.item(i);
+                    var id = row.nr_treni;
+                    var emri = row.emer_treni;
+                    var koha_mberritjes = row.koha_mberritjes;
+                    var koha_nisjes = row.koha_nisjes;
+                    var data = row.data;
+                    // var mosha = row.mosha;
+                    $('#trainList').append(
+                      '<tr>' +
+                        '<td>' +
+                        id +
+                        '</td>' +
+                        '<td>' +
+                        emri +
+                        '</td><td>' +
+                        koha_mberritjes +
+                        '</td><td>' +
+                        koha_nisjes +
+                        '</td>' +
+                        '<td>' +
+                        data +
+                        '</td>' +
+                        '</tr>'
+                    );
+                  }
+                } else {
+                  $('#trainList').append(
+                    '<tr><td colspan="3" align="center">No Item Found</td></tr>'
+                  );
+                }
+              },
+              function (transaction, err) {
+                alert(
+                  'No table found. Click on "Create Table" to create table now'
+                );
+              }
+            );
+          });
+        }
+      });
+    </script>
+
+    <!--
+	NEED CUSTOMIZATION ?
+Reach me:
+Facebook: https://fb.com/saheed54
+Twitter: @Saheedyekeen2
+WhatsApp: +2348161610410
+Email: ysbabatunde@gmail.com, webbuilder07@gmail.com
+-->
+  </body>
+</html>
